@@ -6,20 +6,28 @@ The entry point of the project is the cmd/api/main.go file. This file is respons
 
 ## /internal
 
-The /internal directory contains all the application-specific code. It contains the following subdirectories:
+The /internal directory contains all the application-specific code. It contains the following subdirectories. This is how data flows throughout the app:
+
+Request → Handler → Service → Repository → Database
+Response ← Handler ← Service ← Repository ← Database
 
 ### /handlers
 
 The /handlers directory contains the HTTP request handlers for the application. Each file in this directory is responsible for handling a specific set of routes.
 
-### /models
+### /services
 
-The /models directory contains the data models for the application. Each file in this directory is responsible for defining a specific data model.
+The /services directory contains the business logic for the application.
 
 ### /repository
 
 The /repository directory contains the database repository for the application. This is the data access layer.
 
-### /services
+### /models
 
-The /services directory contains the business logic for the application.
+The /models directory contains the data models for the application. Each file in this directory is responsible for defining a specific data model.
+
+## Libraries
+
+- Gin is used to scaffold the API server and handle routing.
+-

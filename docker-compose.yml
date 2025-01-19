@@ -1,0 +1,47 @@
+services:
+  api:
+    depends_on:
+      - db
+    build:
+      context: .
+      dockerfile: Dockerfile.multistage
+    container_name: vette-services-api-server
+    hostname: vette-services-api-server
+    ports:
+      - 8080:8080
+    environment:
+      - PGHOST=${PGHOST:-db}
+      - PGPORT=${PGPORT:-5432}
+      - PGUSER=${PGUSER:-postgres}
+      - PGPASSWORD=${PGPASSWORD:?database password not set}
+      - PGDATABASE=${PGDATABASE:-vettetracker}
+    networks:
+      - vette-services-net
+    deploy:
+      restart_policy:
+        condition: on-failure
+
+  db:
+    image: postgres:latest
+    restart: always
+    container_name: vette-services-pg-db
+    hostname: db
+    networks:
+      - vette-services-net
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB:-vettetracker}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+    volumes:
+      - pg-vette-services:/var/lib/postgresql/data
+
+volumes:
+  pg-vette-services:
+    name: pg-vette-services
+
+networks:
+  vette-services-net:
+    name: vette-services-net
+    driver: bridge
