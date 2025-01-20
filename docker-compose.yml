@@ -36,6 +36,7 @@ services:
       POSTGRES_USER: ${POSTGRES_USER:-postgres}
     volumes:
       - pg-vette-services:/var/lib/postgresql/data
+      - ./docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
 
 volumes:
   pg-vette-services:

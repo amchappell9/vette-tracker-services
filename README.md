@@ -4,7 +4,9 @@ The API services for the Vette Tracker application. Written in Go, utilizes Post
 
 ## To Run
 
-`go run cmd/api/main.go`
+`docker compose up --build`
+
+This will start the API server and the PostgreSQL database.
 
 ## Project Structure
 

@@ -86,3 +86,9 @@ Connect to the database:
 
 View all databases:
 `\l`
+
+Switch to database:
+`\c vettetracker`
+
+View all tables:
+`\dt`
