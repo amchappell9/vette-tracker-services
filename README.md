@@ -11,3 +11,11 @@ This will start the API server and the PostgreSQL database.
 ## Project Structure
 
 See the [project structure](docs/structure.md) for more information on the layout of the project.
+
+## TODOs
+
+- Consistent error handling
+- Logging
+- Testing
+- Caching
+- Input sanitization

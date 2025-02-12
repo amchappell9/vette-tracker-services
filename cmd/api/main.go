@@ -17,8 +17,12 @@ func main() {
 
 	defer db.Close()
 
+	handler := handlers.NewHandler(db)
+
 	r := gin.Default()
-	r.GET("/ping", handlers.PingHandler)
-	r.GET("/vette/:id", handlers.GetVetteHandler)
+	r.GET("/ping", handler.PingHandler)
+	r.GET("/vette", handler.GetVettes)
+	r.GET("/vette/:id", handler.GetVetteHandler)
+	r.GET("/count", handler.GetVetteCountHandler)
 	r.Run() // listen and serve on 0.0.0.0:8080
 }

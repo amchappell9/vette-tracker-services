@@ -15,6 +15,17 @@ Response ← Handler ← Service ← Repository ← Database
 
 The /handlers directory contains the HTTP request handlers for the application. Each file in this directory is responsible for handling a specific set of routes.
 
+#### Things to Consider:
+
+Consider these things when writing handlers:
+
+- Inputs Parameters
+- Input Validation
+- Authentication and Authorization (using Clerk API)
+- Error Handling
+- Security
+  - Input sanitization
+
 ### /services
 
 The /services directory contains the business logic for the application.
