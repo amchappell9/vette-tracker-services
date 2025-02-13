@@ -1,20 +1,26 @@
 package handlers
 
 import (
-	"database/sql"
 	"log"
 	"strconv"
-	"vette-tracker-services/internal/models"
+	"vette-tracker-services/internal/service"
 
 	"github.com/gin-gonic/gin"
 )
 
-type Handler struct {
-	db *sql.DB
+type VetteHandlerInterface interface {
+	PingHandler(c *gin.Context)
+	GetVettes(c *gin.Context)
+	GetVetteHandler(c *gin.Context)
+	GetVetteCountHandler(c *gin.Context)
 }
 
-func NewHandler(db *sql.DB) *Handler {
-	return &Handler{db: db}
+type Handler struct {
+	vetteService *service.VetteService
+}
+
+func NewHandler(service *service.VetteService) *Handler {
+	return &Handler{vetteService: service}
 }
 
 func (h *Handler) PingHandler(c *gin.Context) {
@@ -22,55 +28,12 @@ func (h *Handler) PingHandler(c *gin.Context) {
 }
 
 func (h *Handler) GetVettes(c *gin.Context) {
-	// TODO: validate user is authenticated
-
-	// TODO: Add where clause for user id
-	rows, err := h.db.Query(`
-		SELECT id, date, user_id, year, miles, cost, 
-			transmission_type, exterior_color, interior_color, 
-			submodel, trim, packages, link
-		FROM vettes
-		ORDER BY date desc 
-	`)
+	vettes, err := h.vetteService.GetVettes()
 
 	if err != nil {
-		c.JSON(500, gin.H{"error": "Failed to retrieve vettes"})
-	}
-
-	defer rows.Close()
-
-	var vettes []models.Vette
-
-	for rows.Next() {
-		var v models.Vette
-
-		err := rows.Scan(&v.ID,
-			&v.Date,
-			&v.UserID,
-			&v.Year,
-			&v.Miles,
-			&v.Cost,
-			&v.TransmissionType,
-			&v.ExteriorColor,
-			&v.InteriorColor,
-			&v.Submodel,
-			&v.Trim,
-			&v.Packages,
-			&v.Link,
-		)
-
-		if err != nil {
-			log.Printf("Error scanning vette: %v\n", err)
-			c.JSON(500, gin.H{"error": "Failed to parse vettes"})
-			return
-		}
-
-		vettes = append(vettes, v)
-	}
-
-	if err = rows.Err(); err != nil {
-		log.Printf("Error iterating over rows: %v\n", err)
-		c.JSON(500, gin.H{"error": "Error iterating over rows"})
+		// TODO: Do I want to panic here?
+		log.Printf("Error getting vettes: %v\n", err)
+		c.JSON(500, gin.H{"error": "Internal server error"})
 		return
 	}
 
@@ -92,46 +55,18 @@ func (h *Handler) GetVetteHandler(c *gin.Context) {
 		return
 	}
 
-	var v models.Vette
-
-	err = h.db.QueryRow(`
-		SELECT id, date, user_id, year, miles, cost, transmission_type, exterior_color,
-			interior_color, submodel, trim, packages, link
-		FROM vettes
-		WHERE id = $1
-	`, vetteID).Scan(
-		&v.ID,
-		&v.Date,
-		&v.UserID,
-		&v.Year,
-		&v.Miles,
-		&v.Cost,
-		&v.TransmissionType,
-		&v.ExteriorColor,
-		&v.InteriorColor,
-		&v.Submodel,
-		&v.Trim,
-		&v.Packages,
-		&v.Link,
-	)
-
-	if err == sql.ErrNoRows {
-		c.JSON(404, gin.H{"error": "Vette not found"})
-		return
-	}
+	vette, err := h.vetteService.GetVette(int(vetteID))
 
 	if err != nil {
-		log.Printf("Failed to retrieve vette: %v\n", err)
-		c.JSON(500, gin.H{"error": "Failed to retrieve vette"})
-		return
+		c.JSON(500, gin.H{"error": "Internal server error"})
 	}
 
-	c.JSON(200, v)
+	c.JSON(200, vette)
+
 }
 
 func (h *Handler) GetVetteCountHandler(c *gin.Context) {
-	var count int
-	err := h.db.QueryRow("SELECT COUNT(*) FROM vettes").Scan(&count)
+	count, err := h.vetteService.GetVettesCount()
 
 	if err != nil {
 		c.JSON(500, gin.H{"error": "Failed to get count"})

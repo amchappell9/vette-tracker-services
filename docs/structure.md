@@ -40,5 +40,4 @@ The /models directory contains the data models for the application. Each file in
 
 ## Libraries
 
-- Gin is used to scaffold the API server and handle routing.
--
+- Gin is used to scaffold the API server and handle routing

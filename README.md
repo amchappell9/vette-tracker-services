@@ -14,6 +14,11 @@ See the [project structure](docs/structure.md) for more information on the layou
 
 ## TODOs
 
+- ~~Separate business logic from handlers~~
+- Use ~~Interfaces~~
+- Create custom errors and error handling
+- Configuration - move database configuration to a dedicated config file
+
 - Consistent error handling
 - Logging
 - Testing

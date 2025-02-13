@@ -4,6 +4,8 @@ import (
 	"log"
 	"vette-tracker-services/internal/database"
 	"vette-tracker-services/internal/handlers"
+	"vette-tracker-services/internal/repository"
+	"vette-tracker-services/internal/service"
 
 	"github.com/gin-gonic/gin"
 )
@@ -17,12 +19,15 @@ func main() {
 
 	defer db.Close()
 
-	handler := handlers.NewHandler(db)
+	// Initialize layers
+	vetteRepo := repository.NewVetteRepository(db)
+	vetteService := service.NewVetteService(vetteRepo)
+	handler := handlers.NewHandler(vetteService)
 
 	r := gin.Default()
 	r.GET("/ping", handler.PingHandler)
-	r.GET("/vette", handler.GetVettes)
-	r.GET("/vette/:id", handler.GetVetteHandler)
-	r.GET("/count", handler.GetVetteCountHandler)
+	r.GET("/vettes", handler.GetVettes)
+	r.GET("/vettes/:id", handler.GetVetteHandler)
+	r.GET("/vettes/count", handler.GetVetteCountHandler)
 	r.Run() // listen and serve on 0.0.0.0:8080
 }
