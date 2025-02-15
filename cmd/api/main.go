@@ -26,8 +26,9 @@ func main() {
 
 	r := gin.Default()
 	r.GET("/ping", handler.PingHandler)
-	r.GET("/vettes", handler.GetVettes)
+	r.GET("/vettes", handler.GetVettesHandler)
 	r.GET("/vettes/:id", handler.GetVetteHandler)
+	r.POST("/vettes", handler.CreateVetteHandler)
 	r.GET("/vettes/count", handler.GetVetteCountHandler)
 	r.Run() // listen and serve on 0.0.0.0:8080
 }

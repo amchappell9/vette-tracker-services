@@ -3,6 +3,7 @@ package handlers
 import (
 	"log"
 	"strconv"
+	"vette-tracker-services/internal/models"
 	"vette-tracker-services/internal/service"
 
 	"github.com/gin-gonic/gin"
@@ -27,7 +28,7 @@ func (h *Handler) PingHandler(c *gin.Context) {
 	c.JSON(200, gin.H{"message": "pong"})
 }
 
-func (h *Handler) GetVettes(c *gin.Context) {
+func (h *Handler) GetVettesHandler(c *gin.Context) {
 	vettes, err := h.vetteService.GetVettes()
 
 	if err != nil {
@@ -62,7 +63,23 @@ func (h *Handler) GetVetteHandler(c *gin.Context) {
 	}
 
 	c.JSON(200, vette)
+}
 
+func (h *Handler) CreateVetteHandler(c *gin.Context) {
+	var createRequestVette models.CreateVetteRequest
+	if err := c.ShouldBindJSON(&createRequestVette); err != nil {
+		c.JSON(400, gin.H{"error": "Invalid request body"})
+		return
+	}
+
+	createdVette, err := h.vetteService.CreateVette(createRequestVette)
+
+	if err != nil {
+		c.JSON(500, gin.H{"error": "Failed to create vette"})
+		return
+	}
+
+	c.JSON(201, createdVette)
 }
 
 func (h *Handler) GetVetteCountHandler(c *gin.Context) {

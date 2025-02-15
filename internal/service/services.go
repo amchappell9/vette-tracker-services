@@ -1,6 +1,7 @@
 package service
 
 import (
+	"time"
 	"vette-tracker-services/internal/models"
 	"vette-tracker-services/internal/repository"
 )
@@ -11,6 +12,7 @@ type VetteServiceInterface interface {
 	GetVettes() ([]models.Vette, error)
 	GetVette(id int) (models.Vette, error)
 	GetVettesCount() (int, error)
+	CreateVette(vette models.Vette) (models.Vette, error)
 }
 
 type VetteService struct {
@@ -32,4 +34,24 @@ func (s *VetteService) GetVette(vetteID int) (models.Vette, error) {
 
 func (s *VetteService) GetVettesCount() (int, error) {
 	return s.repo.GetVettesCount()
+}
+
+func (s *VetteService) CreateVette(createVetteReq models.CreateVetteRequest) (models.Vette, error) {
+	vette := models.Vette{
+		CreatedDate:      time.Now(),
+		UpdatedDate:      time.Now(),
+		UserID:           "123", // Placeholder user ID
+		Year:             createVetteReq.Year,
+		Miles:            createVetteReq.Miles,
+		Cost:             createVetteReq.Cost,
+		TransmissionType: createVetteReq.TransmissionType,
+		ExteriorColor:    createVetteReq.ExteriorColor,
+		InteriorColor:    createVetteReq.InteriorColor,
+		Submodel:         createVetteReq.Submodel,
+		Trim:             createVetteReq.Trim,
+		Packages:         createVetteReq.Packages,
+		Link:             createVetteReq.Link,
+	}
+
+	return s.repo.InsertVette(vette)
 }

@@ -1,6 +1,8 @@
 CREATE TABLE IF NOT EXISTS vettes (
     id SERIAL PRIMARY KEY,
-    date DATE NOT NULL,
+    created_date DATE NOT NULL,
+    updated_date DATE NOT NULL,
+    deleted_date DATE,
     user_id VARCHAR(255) NOT NULL,
     year SMALLINT CHECK (year BETWEEN 1953 AND EXTRACT(YEAR FROM CURRENT_DATE)) NOT NULL,
     miles INTEGER NOT NULL,
@@ -16,7 +18,9 @@ CREATE TABLE IF NOT EXISTS vettes (
 
 -- Insert sample data
 INSERT INTO vettes (
-    date, 
+    created_date,
+    updated_date,
+    deleted_date,
     user_id, 
     year, 
     miles, 
@@ -30,7 +34,9 @@ INSERT INTO vettes (
     link
 ) VALUES
 (
-    '2023-01-15', 
+    '2023-01-15',
+    '2023-01-15',
+    NULL,
     'user123', 
     2020, 
     15000, 
@@ -44,7 +50,9 @@ INSERT INTO vettes (
     'https://example.com/vette1'
 ),
 (
-    '2023-02-20', 
+    '2023-02-20',
+    '2023-02-20',
+    NULL,
     'user456', 
     2021, 
     8500, 
@@ -54,11 +62,13 @@ INSERT INTO vettes (
     'Natural', 
     'Z06', 
     '3LZ', 
-    ARRAY['MRC', 'NPP',], 
+    ARRAY['MRC', 'NPP'], 
     'https://example.com/vette2'
 ),
 (
-    '2023-03-10', 
+    '2023-03-10',
+    '2023-03-10',
+    NULL,
     'user789', 
     2019, 
     25000, 
@@ -68,6 +78,6 @@ INSERT INTO vettes (
     'Red', 
     'Grand Sport', 
     '2LT', 
-    ARRAY[], 
+    ARRAY[]::TEXT[], 
     'https://example.com/vette3'
 );
