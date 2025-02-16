@@ -10,7 +10,6 @@ import (
 )
 
 type VetteHandlerInterface interface {
-	PingHandler(c *gin.Context)
 	GetVettes(c *gin.Context)
 	GetVetteHandler(c *gin.Context)
 	GetVetteCountHandler(c *gin.Context)
@@ -27,15 +26,10 @@ func NewHandler(service *service.VetteService) *Handler {
 	return &Handler{vetteService: service}
 }
 
-func (h *Handler) PingHandler(c *gin.Context) {
-	c.JSON(200, gin.H{"message": "pong"})
-}
-
 func (h *Handler) GetVettesHandler(c *gin.Context) {
 	vettes, err := h.vetteService.GetVettes()
 
 	if err != nil {
-		// TODO: Do I want to panic here?
 		log.Printf("Error getting vettes: %v\n", err)
 		c.JSON(500, gin.H{"error": "Internal server error"})
 		return
