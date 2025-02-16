@@ -2,6 +2,7 @@ package repository
 
 import (
 	"database/sql"
+	"vette-tracker-services/internal/errors"
 	"vette-tracker-services/internal/models"
 )
 
@@ -34,7 +35,10 @@ func (r *VetteRepository) GetVettes() ([]models.Vette, error) {
 		ORDER BY updated_date desc 
 	`)
 	if err != nil {
-		return nil, err
+		return nil, &errors.DatabaseError{
+			Operation: "select_all_vettes",
+			Err:       err,
+		}
 	}
 	defer rows.Close()
 
@@ -59,11 +63,20 @@ func (r *VetteRepository) GetVettes() ([]models.Vette, error) {
 			&v.Link,
 		)
 		if err != nil {
-			return nil, err
+			return nil, &errors.DatabaseError{
+				Operation: "scan_vette",
+				Err:       err,
+			}
 		}
 		vettes = append(vettes, v)
 	}
-	return vettes, rows.Err()
+	if err = rows.Err(); err != nil {
+		return nil, &errors.DatabaseError{
+			Operation: "iterate_vettes",
+			Err:       err,
+		}
+	}
+	return vettes, nil
 }
 
 func (r *VetteRepository) GetVetteByID(vetteID int) (models.Vette, error) {
@@ -92,13 +105,18 @@ func (r *VetteRepository) GetVetteByID(vetteID int) (models.Vette, error) {
 		&v.Link,
 	)
 
-	// TODO: Improve this
 	if err == sql.ErrNoRows {
-		return models.Vette{}, err
+		return models.Vette{}, &errors.NotFoundError{
+			Resource: "vette",
+			ID:       vetteID,
+		}
 	}
 
 	if err != nil {
-		return models.Vette{}, err
+		return models.Vette{}, &errors.DatabaseError{
+			Operation: "select",
+			Err:       err,
+		}
 	}
 
 	return v, nil
@@ -130,7 +148,10 @@ func (r *VetteRepository) InsertVette(vette models.Vette) (models.Vette, error) 
 	)
 
 	if err != nil {
-		return models.Vette{}, err
+		return models.Vette{}, &errors.DatabaseError{
+			Operation: "insert_vette",
+			Err:       err,
+		}
 	}
 
 	return insertedVette, nil
@@ -188,11 +209,17 @@ func (r *VetteRepository) UpdateVette(vetteID int, vette models.Vette) (models.V
 	)
 
 	if err == sql.ErrNoRows {
-		return models.Vette{}, sql.ErrNoRows
+		return models.Vette{}, &errors.NotFoundError{
+			Resource: "vette",
+			ID:       vetteID,
+		}
 	}
 
 	if err != nil {
-		return models.Vette{}, err
+		return models.Vette{}, &errors.DatabaseError{
+			Operation: "update_vette",
+			Err:       err,
+		}
 	}
 
 	return updatedVette, nil
@@ -203,7 +230,10 @@ func (r *VetteRepository) GetVettesCount() (int, error) {
 	err := r.db.QueryRow("SELECT COUNT(*) FROM vettes").Scan(&count)
 
 	if err != nil {
-		return 0, err
+		return 0, &errors.DatabaseError{
+			Operation: "count_vettes",
+			Err:       err,
+		}
 	}
 
 	return count, nil

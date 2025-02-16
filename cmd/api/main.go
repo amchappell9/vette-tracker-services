@@ -4,6 +4,7 @@ import (
 	"log"
 	"vette-tracker-services/internal/database"
 	"vette-tracker-services/internal/handlers"
+	"vette-tracker-services/internal/middleware"
 	"vette-tracker-services/internal/repository"
 	"vette-tracker-services/internal/service"
 
@@ -25,6 +26,8 @@ func main() {
 	handler := handlers.NewHandler(vetteService)
 
 	r := gin.Default()
+	r.Use(middleware.ErrorHandler())
+
 	// Utils
 	r.GET("/ping", handlers.PingHandler)
 
