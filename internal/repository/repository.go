@@ -10,9 +10,10 @@ import (
 type VetteRepositoryInterface interface {
 	GetVettes() ([]models.Vette, error)
 	GetVetteByID(id int) (models.Vette, error)
-	GetVettesCount() (int, error)
 	InsertVette(vette models.Vette) (models.Vette, error)
 	UpdateVette(vetteID int, vette models.Vette) (models.Vette, error)
+	DeleteVette(vetteID int) error
+	GetVettesCount() (int, error)
 }
 
 type VetteRepository struct {
@@ -25,12 +26,13 @@ func NewVetteRepository(db *sql.DB) *VetteRepository {
 
 func (r *VetteRepository) GetVettes() ([]models.Vette, error) {
 	rows, err := r.db.Query(`
-        SELECT id, created_date, updated_date, deleted_date, user_id, year, 
+		SELECT id, created_date, updated_date, deleted_date, user_id, year, 
 					miles, cost, transmission_type, exterior_color, interior_color, 
-          submodel, trim, packages, link
-        FROM vettes
-        ORDER BY updated_date desc 
-    `)
+			submodel, trim, packages, link
+		FROM vettes
+		WHERE deleted_date IS NULL
+		ORDER BY updated_date desc 
+	`)
 	if err != nil {
 		return nil, err
 	}
@@ -71,7 +73,7 @@ func (r *VetteRepository) GetVetteByID(vetteID int) (models.Vette, error) {
 		SELECT id, created_date, updated_date, deleted_date, user_id, year, miles, cost, 
 			transmission_type, exterior_color, interior_color, submodel, trim, packages, link
 		FROM vettes
-		WHERE id = $1
+		WHERE id = $1 AND deleted_date IS NULL
 	`, vetteID).Scan(
 		&v.ID,
 		&v.CreatedDate,

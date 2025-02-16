@@ -14,6 +14,9 @@ type VetteHandlerInterface interface {
 	GetVettes(c *gin.Context)
 	GetVetteHandler(c *gin.Context)
 	GetVetteCountHandler(c *gin.Context)
+	CreateVetteHandler(c *gin.Context)
+	UpdateVetteHandler(c *gin.Context)
+	DeleteVette(c *gin.Context)
 }
 
 type Handler struct {
@@ -112,6 +115,33 @@ func (h *Handler) UpdateVetteHandler(c *gin.Context) {
 	}
 
 	c.JSON(200, updatedVette)
+}
+
+func (h *Handler) DeleteVette(c *gin.Context) {
+	id := c.Param("id")
+
+	// Check that there's an ID
+	if id == "" {
+		c.JSON(400, gin.H{"error": "ID is required"})
+		return
+	}
+
+	// Check that the ID is valid
+	vetteID, err := strconv.ParseInt(id, 10, 32)
+
+	if err != nil {
+		c.JSON(400, gin.H{"error": "ID must be a numeric value"})
+		return
+	}
+
+	err = h.vetteService.DeleteVette(int(vetteID))
+
+	if err != nil {
+		c.JSON(500, gin.H{"error": "Unable to delete vette"})
+		return
+	}
+
+	c.JSON(200, gin.H{"success": true})
 }
 
 func (h *Handler) GetVetteCountHandler(c *gin.Context) {

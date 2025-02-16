@@ -14,6 +14,7 @@ type VetteServiceInterface interface {
 	GetVettesCount() (int, error)
 	CreateVette(vette models.Vette) (models.Vette, error)
 	UpdateVette(vetteId int, updateVetteReq models.VetteRequestObj) (models.Vette, error)
+	DeleteVette(vetteId int) error
 }
 
 type VetteService struct {
@@ -57,9 +58,9 @@ func (s *VetteService) CreateVette(createVetteReq models.VetteRequestObj) (model
 	return s.repo.InsertVette(vette)
 }
 
-func (s *VetteService) UpdateVette(vetteId int, updateVetteReq models.VetteRequestObj) (models.Vette, error) {
+func (s *VetteService) UpdateVette(vetteID int, updateVetteReq models.VetteRequestObj) (models.Vette, error) {
 	// First get the existing vette to preserve unchangeable fields
-	existingVette, err := s.repo.GetVetteByID(vetteId)
+	existingVette, err := s.repo.GetVetteByID(vetteID)
 	if err != nil {
 		return models.Vette{}, err
 	}
@@ -83,5 +84,41 @@ func (s *VetteService) UpdateVette(vetteId int, updateVetteReq models.VetteReque
 		Link:             updateVetteReq.Link,
 	}
 
-	return s.repo.UpdateVette(vetteId, vette)
+	return s.repo.UpdateVette(vetteID, vette)
+}
+
+func (s *VetteService) DeleteVette(vetteID int) error {
+	existingVette, err := s.repo.GetVetteByID(vetteID)
+
+	if err != nil {
+		return err
+	}
+
+	now := time.Now()
+
+	deletedVette := models.Vette{
+		ID:               existingVette.ID,
+		CreatedDate:      existingVette.CreatedDate,
+		UpdatedDate:      existingVette.UpdatedDate,
+		DeletedDate:      &now,
+		UserID:           existingVette.UserID,
+		Year:             existingVette.Year,
+		Miles:            existingVette.Miles,
+		Cost:             existingVette.Cost,
+		TransmissionType: existingVette.TransmissionType,
+		ExteriorColor:    existingVette.ExteriorColor,
+		InteriorColor:    existingVette.InteriorColor,
+		Submodel:         existingVette.Submodel,
+		Trim:             existingVette.Trim,
+		Packages:         existingVette.Packages,
+		Link:             existingVette.Link,
+	}
+
+	_, err = s.repo.UpdateVette(vetteID, deletedVette)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

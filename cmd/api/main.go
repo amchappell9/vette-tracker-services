@@ -30,6 +30,7 @@ func main() {
 	r.GET("/vettes/:id", handler.GetVetteHandler)
 	r.POST("/vettes", handler.CreateVetteHandler)
 	r.PUT("/vettes/:id", handler.UpdateVetteHandler)
+	r.DELETE("/vettes/:id", handler.DeleteVette)
 	r.GET("/vettes/count", handler.GetVetteCountHandler)
 	r.Run() // listen and serve on 0.0.0.0:8080
 }
