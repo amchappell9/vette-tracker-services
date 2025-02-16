@@ -27,7 +27,7 @@ type Vette struct {
 /*
 The structure a caller should pass when inserting a new request.
 */
-type CreateVetteRequest struct {
+type VetteRequestObj struct {
 	Year             int16          `json:"year" binding:"required"`
 	Miles            int            `json:"miles" binding:"required"`
 	Cost             float64        `json:"cost" binding:"required"`

@@ -11,6 +11,8 @@ type VetteRepositoryInterface interface {
 	GetVettes() ([]models.Vette, error)
 	GetVetteByID(id int) (models.Vette, error)
 	GetVettesCount() (int, error)
+	InsertVette(vette models.Vette) (models.Vette, error)
+	UpdateVette(vetteID int, vette models.Vette) (models.Vette, error)
 }
 
 type VetteRepository struct {
@@ -130,6 +132,68 @@ func (r *VetteRepository) InsertVette(vette models.Vette) (models.Vette, error) 
 	}
 
 	return insertedVette, nil
+}
+
+func (r *VetteRepository) UpdateVette(vetteID int, vette models.Vette) (models.Vette, error) {
+	var updatedVette models.Vette
+
+	err := r.db.QueryRow(`
+        UPDATE vettes SET 
+            updated_date = $1,
+            year = $2,
+            miles = $3,
+            cost = $4,
+            transmission_type = $5,
+            exterior_color = $6,
+            interior_color = $7,
+            submodel = $8,
+            trim = $9,
+            packages = $10,
+            link = $11
+        WHERE id = $12
+        RETURNING id, created_date, updated_date, deleted_date, user_id, year, 
+            miles, cost, transmission_type, exterior_color, interior_color, 
+            submodel, trim, packages, link
+    `,
+		vette.UpdatedDate,
+		vette.Year,
+		vette.Miles,
+		vette.Cost,
+		vette.TransmissionType,
+		vette.ExteriorColor,
+		vette.InteriorColor,
+		vette.Submodel,
+		vette.Trim,
+		vette.Packages,
+		vette.Link,
+		vetteID,
+	).Scan(
+		&updatedVette.ID,
+		&updatedVette.CreatedDate,
+		&updatedVette.UpdatedDate,
+		&updatedVette.DeletedDate,
+		&updatedVette.UserID,
+		&updatedVette.Year,
+		&updatedVette.Miles,
+		&updatedVette.Cost,
+		&updatedVette.TransmissionType,
+		&updatedVette.ExteriorColor,
+		&updatedVette.InteriorColor,
+		&updatedVette.Submodel,
+		&updatedVette.Trim,
+		&updatedVette.Packages,
+		&updatedVette.Link,
+	)
+
+	if err == sql.ErrNoRows {
+		return models.Vette{}, sql.ErrNoRows
+	}
+
+	if err != nil {
+		return models.Vette{}, err
+	}
+
+	return updatedVette, nil
 }
 
 func (r *VetteRepository) GetVettesCount() (int, error) {

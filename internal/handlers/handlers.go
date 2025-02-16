@@ -66,7 +66,7 @@ func (h *Handler) GetVetteHandler(c *gin.Context) {
 }
 
 func (h *Handler) CreateVetteHandler(c *gin.Context) {
-	var createRequestVette models.CreateVetteRequest
+	var createRequestVette models.VetteRequestObj
 	if err := c.ShouldBindJSON(&createRequestVette); err != nil {
 		c.JSON(400, gin.H{"error": "Invalid request body"})
 		return
@@ -80,6 +80,38 @@ func (h *Handler) CreateVetteHandler(c *gin.Context) {
 	}
 
 	c.JSON(201, createdVette)
+}
+
+func (h *Handler) UpdateVetteHandler(c *gin.Context) {
+	id := c.Param("id")
+
+	// Validate ID is passed and is numeric
+	if id == "" {
+		c.JSON(400, gin.H{"error": "ID is required"})
+		return
+	}
+
+	vetteID, err := strconv.ParseInt(id, 10, 32)
+
+	if err != nil {
+		c.JSON(400, gin.H{"error": "ID must be a numeric value"})
+		return
+	}
+
+	var updateRequestVette models.VetteRequestObj
+	if err := c.ShouldBindJSON(&updateRequestVette); err != nil {
+		c.JSON(400, gin.H{"error": "Invalid request body"})
+		return
+	}
+
+	updatedVette, err := h.vetteService.UpdateVette(int(vetteID), updateRequestVette)
+
+	if err != nil {
+		c.JSON(500, gin.H{"error": "Failed to update vette"})
+		return
+	}
+
+	c.JSON(200, updatedVette)
 }
 
 func (h *Handler) GetVetteCountHandler(c *gin.Context) {
