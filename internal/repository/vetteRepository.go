@@ -172,8 +172,9 @@ func (r *VetteRepository) UpdateVette(vetteID int, vette models.Vette) (models.V
             submodel = $8,
             trim = $9,
             packages = $10,
-            link = $11
-        WHERE id = $12
+            link = $11,
+						deleted_date = $12
+        WHERE id = $13
         RETURNING id, created_date, updated_date, deleted_date, user_id, year, 
             miles, cost, transmission_type, exterior_color, interior_color, 
             submodel, trim, packages, link
@@ -189,6 +190,7 @@ func (r *VetteRepository) UpdateVette(vetteID int, vette models.Vette) (models.V
 		vette.Trim,
 		vette.Packages,
 		vette.Link,
+		vette.DeletedDate,
 		vetteID,
 	).Scan(
 		&updatedVette.ID,
