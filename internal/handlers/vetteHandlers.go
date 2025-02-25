@@ -21,10 +21,10 @@ type VetteHandlerInterface interface {
 }
 
 type Handler struct {
-	vetteService *service.VetteService
+	vetteService service.VetteServiceInterface
 }
 
-func NewHandler(service *service.VetteService) *Handler {
+func NewHandler(service service.VetteServiceInterface) *Handler {
 	return &Handler{vetteService: service}
 }
 
@@ -37,7 +37,7 @@ func (h *Handler) GetVettesHandler(c *gin.Context) {
 		return
 	}
 
-	c.JSON(200, vettes)
+	c.JSON(http.StatusOK, vettes)
 }
 
 func (h *Handler) GetVetteHandler(c *gin.Context) {

@@ -12,14 +12,22 @@ This will start the API server and the PostgreSQL database.
 
 See the [project structure](docs/structure.md) for more information on the layout of the project.
 
-## TODOs
+## API TODOs
 
 - ~~Separate business logic from handlers~~
 - ~~Use Interfaces~~
-- Create custom errors and error handling
-- Configuration - move database configuration to a dedicated config file
-
+- ~~Create custom errors and error handling~~
 - Logging
+- Configuration - move database configuration to a dedicated config file
 - Testing
-- Caching
-- Input sanitization
+- ~~Caching~~
+- ~~Input sanitization~~
+- OpenAPI Spec generation
+
+## Larger TODOs
+
+- Modify UI to call these services
+- Integrate with Clerk API for authentication and authorization
+- Figure out how to deploy to Digital Ocean droplet
+- Implement a CI/CD pipeline to autodeploy changes
+- Figure out how to deploy a dev and prod instance on the same droplet

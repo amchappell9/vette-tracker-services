@@ -12,7 +12,7 @@ type VetteServiceInterface interface {
 	GetVettes() ([]models.Vette, error)
 	GetVette(id int) (models.Vette, error)
 	GetVettesCount() (int, error)
-	CreateVette(vette models.Vette) (models.Vette, error)
+	CreateVette(vette models.VetteRequestObj) (models.Vette, error)
 	UpdateVette(vetteId int, updateVetteReq models.VetteRequestObj) (models.Vette, error)
 	DeleteVette(vetteId int) error
 }
