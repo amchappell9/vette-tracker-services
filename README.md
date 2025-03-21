@@ -24,7 +24,7 @@ See the [project structure](docs/structure.md) for more information on the layou
 - ~~Input sanitization~~
 - OpenAPI Spec generation
 
-## Larger TODOs
+## UI Integration TODOs
 
 - Modify UI to call these services
 - Integrate with Clerk API for authentication and authorization
