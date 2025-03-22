@@ -9,7 +9,7 @@ import (
 // This is the data access layer
 
 type VetteRepositoryInterface interface {
-	GetVettes() ([]models.Vette, error)
+	GetVettes(userID string) ([]models.Vette, error)
 	GetVetteByID(id int) (models.Vette, error)
 	InsertVette(vette models.Vette) (models.Vette, error)
 	UpdateVette(vetteID int, vette models.Vette) (models.Vette, error)
@@ -25,15 +25,15 @@ func NewVetteRepository(db *sql.DB) *VetteRepository {
 	return &VetteRepository{db: db}
 }
 
-func (r *VetteRepository) GetVettes() ([]models.Vette, error) {
+func (r *VetteRepository) GetVettes(userID string) ([]models.Vette, error) {
 	rows, err := r.db.Query(`
 		SELECT id, created_date, updated_date, deleted_date, user_id, year, 
 					miles, cost, transmission_type, exterior_color, interior_color, 
 			submodel, trim, packages, link
 		FROM vettes
-		WHERE deleted_date IS NULL
+		WHERE deleted_date IS NULL AND user_id = $1
 		ORDER BY updated_date desc 
-	`)
+	`, userID)
 	if err != nil {
 		return nil, &errors.DatabaseError{
 			Operation: "select_all_vettes",

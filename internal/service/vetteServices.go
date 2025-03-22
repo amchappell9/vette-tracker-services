@@ -9,10 +9,10 @@ import (
 // The is the business logic layer
 
 type VetteServiceInterface interface {
-	GetVettes() ([]models.Vette, error)
+	GetVettes(userID string) ([]models.Vette, error)
 	GetVette(id int) (models.Vette, error)
 	GetVettesCount() (int, error)
-	CreateVette(vette models.VetteRequestObj) (models.Vette, error)
+	CreateVette(vette models.VetteRequestObj, userID string) (models.Vette, error)
 	UpdateVette(vetteId int, updateVetteReq models.VetteRequestObj) (models.Vette, error)
 	DeleteVette(vetteId int) error
 }
@@ -25,9 +25,9 @@ func NewVetteService(repo *repository.VetteRepository) *VetteService {
 	return &VetteService{repo: repo}
 }
 
-func (s *VetteService) GetVettes() ([]models.Vette, error) {
+func (s *VetteService) GetVettes(userID string) ([]models.Vette, error) {
 	// TODO: business logic such as filtering, authorization
-	return s.repo.GetVettes()
+	return s.repo.GetVettes(userID)
 }
 
 func (s *VetteService) GetVette(vetteID int) (models.Vette, error) {
@@ -38,11 +38,11 @@ func (s *VetteService) GetVettesCount() (int, error) {
 	return s.repo.GetVettesCount()
 }
 
-func (s *VetteService) CreateVette(createVetteReq models.VetteRequestObj) (models.Vette, error) {
+func (s *VetteService) CreateVette(createVetteReq models.VetteRequestObj, userID string) (models.Vette, error) {
 	vette := models.Vette{
 		CreatedDate:      time.Now(),
 		UpdatedDate:      time.Now(),
-		UserID:           "123", // Placeholder user ID
+		UserID:           userID,
 		Year:             createVetteReq.Year,
 		Miles:            createVetteReq.Miles,
 		Cost:             createVetteReq.Cost,

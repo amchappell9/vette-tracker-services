@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"strconv"
 	"vette-tracker-services/internal/errors"
+	"vette-tracker-services/internal/middleware"
 	"vette-tracker-services/internal/models"
 	"vette-tracker-services/internal/service"
 
@@ -29,7 +30,16 @@ func NewHandler(service service.VetteServiceInterface) *Handler {
 }
 
 func (h *Handler) GetVettesHandler(c *gin.Context) {
-	vettes, err := h.vetteService.GetVettes()
+
+	claims, ok := middleware.GetUserClaims(c)
+	if !ok {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not authenticated"})
+		return
+	}
+
+	userID := claims.Subject // Clerk's Subject claim is the user ID
+
+	vettes, err := h.vetteService.GetVettes(userID)
 
 	if err != nil {
 		log.Printf("Error getting vettes: %v\n", err)
@@ -72,6 +82,14 @@ func (h *Handler) GetVetteHandler(c *gin.Context) {
 }
 
 func (h *Handler) CreateVetteHandler(c *gin.Context) {
+	claims, ok := middleware.GetUserClaims(c)
+	if !ok {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not authenticated"})
+		return
+	}
+
+	userID := claims.Subject
+
 	var createRequestVette models.VetteRequestObj
 	if err := c.ShouldBindJSON(&createRequestVette); err != nil {
 		c.Error(&errors.ValidationError{
@@ -81,7 +99,7 @@ func (h *Handler) CreateVetteHandler(c *gin.Context) {
 		return
 	}
 
-	createdVette, err := h.vetteService.CreateVette(createRequestVette)
+	createdVette, err := h.vetteService.CreateVette(createRequestVette, userID)
 
 	if err != nil {
 		c.Error(&errors.DatabaseError{

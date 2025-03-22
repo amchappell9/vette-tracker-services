@@ -2,22 +2,30 @@ package main
 
 import (
 	"log"
+	"os"
 	"vette-tracker-services/internal/database"
 	"vette-tracker-services/internal/handlers"
 	"vette-tracker-services/internal/middleware"
 	"vette-tracker-services/internal/repository"
 	"vette-tracker-services/internal/service"
 
+	"github.com/clerk/clerk-sdk-go/v2"
 	"github.com/gin-gonic/gin"
 )
 
 func main() {
-	db, err := database.NewConnection()
+	key := os.Getenv("CLERK_SECRET_KEY")
+	if key == "" {
+		log.Fatal("CLERK_SECRET_KEY environment variable is not set")
+	}
 
+	// Create a new Clerk client instance
+	clerk.SetKey(key)
+
+	db, err := database.NewConnection()
 	if err != nil {
 		log.Fatalf("Could not initialize database connection: %v", err)
 	}
-
 	defer db.Close()
 
 	// Initialize layers
@@ -28,16 +36,25 @@ func main() {
 	r := gin.Default()
 	r.Use(middleware.ErrorHandler())
 
-	// Utils
+	// Utils (Public)
 	r.GET("/ping", handlers.PingHandler)
 
-	// Vette Handlers
-	r.GET("/vettes", handler.GetVettesHandler)
-	r.GET("/vettes/:id", handler.GetVetteHandler)
-	r.POST("/vettes", handler.CreateVetteHandler)
-	r.PUT("/vettes/:id", handler.UpdateVetteHandler)
-	r.DELETE("/vettes/:id", handler.DeleteVette)
-	r.GET("/vettes/count", handler.GetVetteCountHandler)
+	// Vette Handlers (Protected)
+	protected := r.Group("")
+	protected.Use(middleware.ClerkAuth())
+	{
+		protected.GET("/vettes", handler.GetVettesHandler)
+		protected.GET("/vettes/:id", handler.GetVetteHandler)
+		protected.POST("/vettes", handler.CreateVetteHandler)
+		protected.PUT("/vettes/:id", handler.UpdateVetteHandler)
+		protected.DELETE("/vettes/:id", handler.DeleteVette)
+		protected.GET("/vettes/count", handler.GetVetteCountHandler)
+	}
 
-	r.Run() // listen and serve on 0.0.0.0:8080
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
+
+	r.Run(":" + port)
 }
