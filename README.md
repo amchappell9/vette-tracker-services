@@ -26,8 +26,8 @@ See the [project structure](docs/structure.md) for more information on the layou
 
 ## UI Integration TODOs
 
-- Modify UI to call these services
-- Integrate with Clerk API for authentication and authorization
+- ~~Modify UI to call these services~~
+- ~~Integrate with Clerk API for authentication and authorization~~
 - Figure out how to deploy to Digital Ocean droplet
 - Implement a CI/CD pipeline to autodeploy changes
 - Figure out how to deploy a dev and prod instance on the same droplet
