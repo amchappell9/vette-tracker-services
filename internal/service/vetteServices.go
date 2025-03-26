@@ -10,11 +10,11 @@ import (
 
 type VetteServiceInterface interface {
 	GetVettes(userID string) ([]models.Vette, error)
-	GetVette(id int) (models.Vette, error)
+	GetVette(id int, userID string) (models.Vette, error)
 	GetVettesCount() (int, error)
 	CreateVette(vette models.VetteRequestObj, userID string) (models.Vette, error)
-	UpdateVette(vetteId int, updateVetteReq models.VetteRequestObj) (models.Vette, error)
-	DeleteVette(vetteId int) error
+	UpdateVette(vetteId int, updateVetteReq models.VetteRequestObj, userID string) (models.Vette, error)
+	DeleteVette(vetteId int, userID string) error
 }
 
 type VetteService struct {
@@ -26,12 +26,11 @@ func NewVetteService(repo *repository.VetteRepository) *VetteService {
 }
 
 func (s *VetteService) GetVettes(userID string) ([]models.Vette, error) {
-	// TODO: business logic such as filtering, authorization
 	return s.repo.GetVettes(userID)
 }
 
-func (s *VetteService) GetVette(vetteID int) (models.Vette, error) {
-	return s.repo.GetVetteByID(vetteID)
+func (s *VetteService) GetVette(vetteID int, userID string) (models.Vette, error) {
+	return s.repo.GetVetteByID(vetteID, userID)
 }
 
 func (s *VetteService) GetVettesCount() (int, error) {
@@ -58,9 +57,9 @@ func (s *VetteService) CreateVette(createVetteReq models.VetteRequestObj, userID
 	return s.repo.InsertVette(vette)
 }
 
-func (s *VetteService) UpdateVette(vetteID int, updateVetteReq models.VetteRequestObj) (models.Vette, error) {
+func (s *VetteService) UpdateVette(vetteID int, updateVetteReq models.VetteRequestObj, userID string) (models.Vette, error) {
 	// First get the existing vette to preserve unchangeable fields
-	existingVette, err := s.repo.GetVetteByID(vetteID)
+	existingVette, err := s.repo.GetVetteByID(vetteID, userID)
 	if err != nil {
 		return models.Vette{}, err
 	}
@@ -84,11 +83,11 @@ func (s *VetteService) UpdateVette(vetteID int, updateVetteReq models.VetteReque
 		Link:             updateVetteReq.Link,
 	}
 
-	return s.repo.UpdateVette(vetteID, vette)
+	return s.repo.UpdateVette(vetteID, vette, userID)
 }
 
-func (s *VetteService) DeleteVette(vetteID int) error {
-	existingVette, err := s.repo.GetVetteByID(vetteID)
+func (s *VetteService) DeleteVette(vetteID int, userID string) error {
+	existingVette, err := s.repo.GetVetteByID(vetteID, userID)
 
 	if err != nil {
 		return err
@@ -114,7 +113,7 @@ func (s *VetteService) DeleteVette(vetteID int) error {
 		Link:             existingVette.Link,
 	}
 
-	_, err = s.repo.UpdateVette(vetteID, deletedVette)
+	_, err = s.repo.UpdateVette(vetteID, deletedVette, userID)
 
 	if err != nil {
 		return err

@@ -10,6 +10,9 @@ import (
 )
 
 // ClerkAuth is a middleware that adapts Clerk's WithHeaderAuthorization for Gin
+// The client must provide the session token in the Authorization header, otherwise
+// the middleware will return a 401 Unauthorized response.
+// https://clerk.com/docs/backend-requests/overview
 func ClerkAuth() gin.HandlerFunc {
 	// This is Clerk's standard HTTP middleware
 	clerkMiddleware := clerkhttp.WithHeaderAuthorization()
@@ -42,7 +45,6 @@ func ClerkAuth() gin.HandlerFunc {
 
 		// If the Clerk middleware wrote a response, stop the Gin chain
 		if w.written {
-			log.Printf("Authentication failed with status code: %d", w.statusCode)
 			c.Abort()
 		}
 	}

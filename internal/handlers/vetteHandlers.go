@@ -30,7 +30,6 @@ func NewHandler(service service.VetteServiceInterface) *Handler {
 }
 
 func (h *Handler) GetVettesHandler(c *gin.Context) {
-
 	claims, ok := middleware.GetUserClaims(c)
 	if !ok {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not authenticated"})
@@ -47,10 +46,20 @@ func (h *Handler) GetVettesHandler(c *gin.Context) {
 		return
 	}
 
+	if vettes == nil {
+		vettes = []models.Vette{}
+	}
+
 	c.JSON(http.StatusOK, vettes)
 }
 
 func (h *Handler) GetVetteHandler(c *gin.Context) {
+	claims, ok := middleware.GetUserClaims(c)
+	if !ok {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not authenticated"})
+		return
+	}
+
 	id := c.Param("id")
 
 	// Validate ID is passed and is numeric
@@ -71,7 +80,9 @@ func (h *Handler) GetVetteHandler(c *gin.Context) {
 		return
 	}
 
-	vette, err := h.vetteService.GetVette(int(vetteID))
+	userID := claims.Subject
+
+	vette, err := h.vetteService.GetVette(int(vetteID), userID)
 
 	if err != nil {
 		c.Error(err)
@@ -113,6 +124,14 @@ func (h *Handler) CreateVetteHandler(c *gin.Context) {
 }
 
 func (h *Handler) UpdateVetteHandler(c *gin.Context) {
+	claims, ok := middleware.GetUserClaims(c)
+	if !ok {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not authenticated"})
+		return
+	}
+
+	userID := claims.Subject
+
 	id := c.Param("id")
 
 	// Validate ID is passed and is numeric
@@ -142,7 +161,7 @@ func (h *Handler) UpdateVetteHandler(c *gin.Context) {
 		return
 	}
 
-	updatedVette, err := h.vetteService.UpdateVette(int(vetteID), updateRequestVette)
+	updatedVette, err := h.vetteService.UpdateVette(int(vetteID), updateRequestVette, userID)
 	if err != nil {
 		c.Error(&errors.DatabaseError{
 			Operation: "update_vette",
@@ -155,6 +174,14 @@ func (h *Handler) UpdateVetteHandler(c *gin.Context) {
 }
 
 func (h *Handler) DeleteVette(c *gin.Context) {
+	claims, ok := middleware.GetUserClaims(c)
+	if !ok {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not authenticated"})
+		return
+	}
+
+	userID := claims.Subject
+
 	id := c.Param("id")
 
 	// Check that there's an ID
@@ -176,7 +203,7 @@ func (h *Handler) DeleteVette(c *gin.Context) {
 		return
 	}
 
-	err = h.vetteService.DeleteVette(int(vetteID))
+	err = h.vetteService.DeleteVette(int(vetteID), userID)
 	if err != nil {
 		c.Error(&errors.DatabaseError{
 			Operation: "delete_vette",
