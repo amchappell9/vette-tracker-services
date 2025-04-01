@@ -20,7 +20,7 @@ jobs:
 
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@4
+        uses: actions/checkout@3
 
       - name: Docker Login
         uses: docker/login-action@v3.4.0
