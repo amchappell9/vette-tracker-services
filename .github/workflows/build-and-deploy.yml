@@ -38,6 +38,9 @@ jobs:
         uses: docker/metadata-action@9ec57ed1fcdbf14dcef7dfbe97b2010124a938b7
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=raw,value=latest
+            type=sha,format=long
 
       - name: Build and push Docker image
         id: push
@@ -76,3 +79,9 @@ jobs:
             docker compose pull && \
             docker compose up -d && \
             docker image prune -f"
+      - name: Verify deployment
+        run: |
+          ssh -i ~/.ssh/deploy_key ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "\
+            cd ${{ env.DEPLOY_PATH }} && \
+            docker ps -a | grep vette-services-api-server && \
+            docker inspect vette-services-api-server --format '{{.Image}}'"
