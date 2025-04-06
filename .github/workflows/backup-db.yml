@@ -1,0 +1,62 @@
+name: Database Backup
+
+on:
+  schedule:
+    # Run at midnight every day (UTC)
+    - cron: "0 0 * * *"
+  # Optional: Allow manual triggering
+  workflow_dispatch:
+
+env:
+  DEPLOY_PATH: /opt/vette-tracker
+
+jobs:
+  backup:
+    name: Create and upload database backup
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Set timestamp
+        id: timestamp
+        run: echo "timestamp=$(date +'%Y-%m-%d-%H-%M-%S')" >> $GITHUB_OUTPUT
+
+      - name: Set up SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          echo "${{ secrets.SSH_KNOWN_HOSTS }}" > ~/.ssh/known_hosts
+
+      - name: Create backup on server
+        run: |
+          ssh -i ~/.ssh/deploy_key ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
+            # Navigate to a temporary directory
+            mkdir -p /tmp/db-backups
+            cd /tmp/db-backups
+            
+            # Create the backup (adjust the database credentials as needed)
+            docker exec vette-services-pg-db pg_dump -U vettetrackerservices -d vettetracker -F c > vette-tracker-backup-${{ steps.timestamp.outputs.timestamp }}.dump
+            
+            # Compress the backup
+            gzip vette-tracker-backup-${{ steps.timestamp.outputs.timestamp }}.dump
+          EOF
+
+      - name: Download backup from server
+        run: |
+          scp -i ~/.ssh/deploy_key ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/tmp/db-backups/vette-tracker-backup-${{ steps.timestamp.outputs.timestamp }}.dump.gz ./vette-tracker-backup-${{ steps.timestamp.outputs.timestamp }}.dump.gz
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Upload backup to S3
+        run: |
+          aws s3 cp ./vette-tracker-backup-${{ steps.timestamp.outputs.timestamp }}.dump.gz s3://${{ secrets.AWS_S3_BUCKET }}/vette-tracker-backup-${{ steps.timestamp.outputs.timestamp }}.dump.gz
+
+      - name: Cleanup
+        run: |
+          ssh -i ~/.ssh/deploy_key ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "rm -rf /tmp/db-backups"
+          rm -f ./vette-tracker-backup-${{ steps.timestamp.outputs.timestamp }}.dump.gz

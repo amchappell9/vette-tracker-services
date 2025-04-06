@@ -79,6 +79,7 @@ jobs:
             docker compose pull && \
             docker compose up -d && \
             docker image prune -f"
+
       - name: Verify deployment
         run: |
           ssh -i ~/.ssh/deploy_key ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "\

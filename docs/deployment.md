@@ -59,7 +59,7 @@ docker compose up -d
 
 ## Database Backups
 
-A GitHub action creates a backup of the database on the server, and pushes it to Digital Ocean SPaces. The backup is created using the `pg_dump` command, which creates a SQL file that can be used to restore the database.
+A GitHub action creates a backup of the database on the server, and pushes it an S3 bucket. The backup is created using the `pg_dump` command, which creates a SQL file that can be used to restore the database. See the [.github/workflows/backup.yml](../.github/workflows/backup.yml) file for the details of the workflow.
 
 ## Initial Digital Ocean Setup steps
 
